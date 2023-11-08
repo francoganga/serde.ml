@@ -1,3 +1,5 @@
+
+
 type 'err de_error =
   [> `Duplicate_field of string
   | `Invalid_field_index of int
@@ -8,7 +10,8 @@ type 'err de_error =
   | `Missing_field of string
   | `Unimplemented of string
   | `Unknown_field of string
-  | `Unknown_variant of string ]
+  | `Unknown_variant of string
+  | `Invalid_value_at_pos of int * int]
   as
   'err
 
@@ -20,3 +23,4 @@ let unimplemented str = Error (`Unimplemented str)
 let unknown_field str = Error (`Unknown_field str)
 let unknown_variant str = Error (`Unknown_variant str)
 let missing_field field = Error (`Missing_field field)
+let invalid_value_at_pos start _end = Error (`Invalid_value_at_pos (start, _end))

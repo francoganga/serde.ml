@@ -44,6 +44,10 @@ let print_err err =
       print_string "error serializing";
       print_newline ();
       false
+  | `De (`Invalid_value_at_pos _) ->
+      print_string "invalid_value_at_pos";
+      print_newline ();
+      false
 
 let parse_sexpr eq fn s t =
   match Serde_sexpr.of_string fn s |> Result.map_error (fun x -> `De x) with

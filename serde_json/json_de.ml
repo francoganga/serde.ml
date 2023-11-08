@@ -37,8 +37,15 @@ Serde.De.Make (struct
       (value, 'error de_error) result =
    fun state (module Self) (module V) ->
     Json.Parser.skip_space state;
-    let* int = Json.Parser.read_int state in
-    V.visit_int int
+    let int = Json.Parser.read_int state in
+    match int with
+    | Ok int -> V.visit_int int
+    | Error `Message _ ->
+        let offs = state.lexbuf.lex_abs_pos - 1 in
+        let bol = state.yojson.bol in
+        let pos1 = offs + state.lexbuf.lex_start_pos - bol - 1 in
+        let pos2 = max pos1 (offs + state.lexbuf.lex_curr_pos - bol) in
+        Error.invalid_value_at_pos pos1 pos2
 
   let deserialize_string :
       type value.
@@ -48,8 +55,12 @@ Serde.De.Make (struct
       (value, 'error de_error) result =
    fun state (module Self) (module V) ->
     Json.Parser.skip_space state;
-    let* string = Json.Parser.read_string state in
-    V.visit_string string
+    let string = Json.Parser.read_string state in
+    match string with
+    | Ok string -> V.visit_string string
+    | Error (`Message msg) ->
+        Printf.printf "lnum=%d" state.yojson.lnum;
+        Error.message msg
 
   let deserialize_option :
       type value.

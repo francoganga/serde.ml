@@ -34,6 +34,8 @@ let print_err err =
   | `Ser _ ->
       print_string "error serializing";
       false
+  | `De (`Invalid_value_at_pos _) ->
+      false
 
 let parse_json eq fn s t =
   match Serde_json.of_string fn s |> Result.map_error (fun x -> `De x) with
@@ -250,6 +252,25 @@ module Type_variant = struct
            favorite_number = 9;
            location = "Bajor";
          })
+
+
+
+end
+
+module Example = struct
+
+  type person = { name : string; age : int } [@@deriving eq, serializer, deserializer]
+
+  let res () = let v = Serde_json.of_string deserialize_person {|{ "name": "Test", "age": "a" }|} in
+    match v with
+    | Error `Invalid_value_at_pos _ -> true
+    | Ok _ -> false
+    | Error _ -> false
+
+  let%test _ = res ()
+
+
+
 end
 
 (*
